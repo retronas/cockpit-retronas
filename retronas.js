@@ -139,10 +139,10 @@ function open_modal() {
     // show what we clicked on
     console.log(this.id);
     var key = document.getElementById(this.id+"-page");
+    var item_modaldesc = document.getElementById(this.id+"-desc");
     var key_name = key.id.toLowerCase();
     var content = document.getElementById(this.id+"-content");
     var id = this.id.replace('-modal','');
-    console.log(id);
     var item = rn_menu_data.dialog[id];
 
     // lazy
@@ -156,9 +156,13 @@ function open_modal() {
 
     item_ul.id = "ul-"+ key_name;
 
-    
+    item_modaldesc.replaceChildren();
+    item_modaldesc.innerHTML = item.description.replaceAll('\n','<br />');
+    content.appendChild(item_modaldesc);
+
+
     content.appendChild(item_ul);
-    
+
     item.items.forEach(item=>{
         build_page_menu_items(item, key);
     });
@@ -222,8 +226,15 @@ function build_menus(menu="main", type="page") {
 
                 var item_page = document.getElementById(page_name);
                 const item_ul = document.createElement('ul');
+                const item_modaldesc = document.createElement('div');
                 item_ul.id = "ul-"+key_name;
+                item_page.appendChild(item_modaldesc);
                 item_page.appendChild(item_ul);
+
+                item_modaldesc.id = key_name+"-desc"
+                item_modaldesc.classList = "rn-modal-desc";
+                item_modaldesc.replaceChildren();
+                item_modaldesc.innerHTML = key.description.replaceAll('\n','<br />');
 
                 // items
                 key_prompt = rn_menu_data.dialog[key_name].prompt;
@@ -296,14 +307,19 @@ function build_page_menu_items(item, key) {
             item_button.id = item.id.toLowerCase()+"-"+item.type;
 
             // create the div to display as a modal
+
             const item_modalb = document.createElement('div');
             const item_modal = document.createElement('div');
             const item_modalc = document.createElement('div');
             const item_modals = document.createElement('span');
+            const item_modaldesc = document.createElement('div');
 
             item_modals.classList = "rn-modal-close";
             item_modals.innerHTML = "&times;";
             item_modals.addEventListener("click", close_modal);
+
+            item_modaldesc.id = item_button.id+"-desc"
+            item_modaldesc.classList = "rn-modal-desc";
 
             item_modalb.id = item_button.id+"-page";
             item_modalb.classList = "rn-modal rn-hidden";
@@ -314,6 +330,7 @@ function build_page_menu_items(item, key) {
 
             item_modal.appendChild(item_modals);
             item_modal.appendChild(item_modalc);
+            item_modal.appendChild(item_modaldesc);
             item_modalb.appendChild(item_modal)
 
             document.body.appendChild(item_modalb);
