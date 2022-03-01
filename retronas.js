@@ -33,6 +33,7 @@ function _log(output) {
 // generic spawn wrapper
 function exec_do(cmd_os, options={err:'out'}, dolog=true) {
 
+    //console.log(cmd_os);
     var current = document.getElementById(cmd_os[1]);
     var loading = document.createElement('img');
     var parent = current.parentNode;
@@ -80,10 +81,21 @@ function exec_n(cmd_os, dolog=true) {
 // installers
 function install_options() {
 
-    var rn_cmd_request = this.id;
+    var rn_cmd_request = "";
+    var menu_item = this.id;
+    // this is horrid
+    var menu_name = this.parentNode.parentNode.parentNode.id.replace("ul-","");
+    //console.log(rn_menu_data.dialog[menu_name]);
+    rn_menu_data.dialog[menu_name].items.forEach(item=>{
+        if ( menu_item === item.id ) {
+            rn_cmd_request = item.command;
+        }
+    })
+
     var rn_cmd = runner_ansible;
     var cmd_os = [rn_cmd, rn_cmd_request];
     var results = exec_su(cmd_os);
+
 };
 
 // elevated scripts out of static/
@@ -137,7 +149,7 @@ function hide_modal() {
 function open_modal() {
     hide_modal();
     // show what we clicked on
-    console.log(this.id);
+    //console.log(this.id);
     var key = document.getElementById(this.id+"-page");
     var item_modaldesc = document.getElementById(this.id+"-desc");
     var key_name = key.id.toLowerCase();
@@ -221,7 +233,7 @@ function build_menus(menu="main", type="page") {
             key_name = key.id.toLowerCase();
             if ( key_name !== 'exit' ) {
 
-                console.log(key_name);
+                //console.log(key_name);
                 page_name = "rn-"+key_name+'-'+type;
 
                 var item_page = document.getElementById(page_name);
@@ -411,7 +423,7 @@ function read_ansible_cfg() {
             update_input_from_cfg(rn_settings);
         })
         .catch(error => {
-            console.log(error);
+            //console.log(error);
             var msg = "Failed to read config file";
             alert(msg);
             _log(msg)
@@ -435,7 +447,7 @@ function read_menu_data() {
 
         })
         .catch(error => {
-            console.log(error);
+            //console.log(error);
             var msg = "Failed to read config file";
             alert(msg);
             _log(msg)
@@ -462,7 +474,7 @@ function scan_path() {
     var rn_cmd = '/opt/retronas/lib/format_path.sh';
     var cmd_os = [rn_cmd, rn_cmd_request];
 
-    console.log(cmd_os)
+    //console.log(cmd_os)
     var results = exec_n(cmd_os);
 };
 
