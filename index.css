@@ -171,6 +171,10 @@ h1::after {
 	float:right;
 }
 
+.rn-sureq {
+	color: rgb(73, 26, 26);
+}
+
 .info {
 	background-color: rgb(152, 175, 251);
 	color: white;

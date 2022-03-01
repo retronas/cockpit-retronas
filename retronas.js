@@ -275,6 +275,7 @@ function build_page_menu_items(item, key) {
 
         // default button id
         item_button.id = item.id.toLowerCase();
+        var superuser_required = false;
 
         // add the listener
         // types
@@ -284,9 +285,11 @@ function build_page_menu_items(item, key) {
         // |- script-static          /scripts/static  priv user scripts
         // |- script-static-values   /scripts/static  priv user scripts that take input
         // |- form                   -                open "id-menu" object
+        // !- input:<type>           -                add an input of type to a page
 
         if ( item.type === "install" ) {
             item_button.addEventListener("click", install_options);
+            superuser_required = true;
         } 
         else if (item.type === "script") {
             item_button.addEventListener("click", run_script);
@@ -297,10 +300,12 @@ function build_page_menu_items(item, key) {
         else if (item.type === "script-static") {
             item_button.addEventListener("click", run_script_su); 
             item_button.id = "s-"+item.id.toLowerCase();
+            superuser_required = true;
         }
         else if (item.type === "script-static-values") {
             item_button.addEventListener("click", run_script_su_values);
             item_button.id = "s-"+item.id.toLowerCase();
+            superuser_required = true;
         }
         else if (item.type === "modal") {
             item_button.addEventListener("click", open_modal);
@@ -340,6 +345,12 @@ function build_page_menu_items(item, key) {
         item_button.classList = 'rn-menu';
         item_button.innerText = item_prompt;                        
 
+        if ( superuser_required ) {
+            //item_li.classList = "rn-tile rn-sureq";
+        }
+        else {
+            //item_li.classList = "rn-tile";
+        }
         item_li.classList = "rn-tile";
         item_title.classList = "rn-tile-title";
         item_title.innerText = item.title;
