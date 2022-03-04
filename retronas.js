@@ -169,7 +169,7 @@ function open_modal() {
     item_ul.id = "ul-"+ key_name;
 
     item_modaldesc.replaceChildren();
-    item_modaldesc.innerHTML = item.description.replaceAll('\n','<br />');
+    item_modaldesc.innerHTML = item.description.replaceAll('|','<br />').replaceAll('\\','');
     content.appendChild(item_modaldesc);
 
 
