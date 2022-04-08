@@ -511,4 +511,4 @@ window.onload = function() {
 }
 
 // nfi what this does, remove it and see what breaks at some point
-cockpit.transport.wait(function() { })
+// cockpit.transport.wait(function() { })

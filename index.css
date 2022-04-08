@@ -120,10 +120,12 @@ h1::after {
 	font-size: 1.2em;
 	padding:0;
 	margin:0;
+	margin-bottom: 0.2em;
 }
 
 .rn-tile-description {
 	font-size: 0.9em;
+	line-height: 1.2em;
 }
 
 .rn-modal {
