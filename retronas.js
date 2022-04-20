@@ -33,32 +33,36 @@ function _log(output) {
 // generic spawn wrapper
 function exec_do(cmd_os, options={err:'out'}, dolog=true) {
 
-    //console.log(cmd_os);
-    var current = document.getElementById(cmd_os[1]);
+    var commands = [];
+    commands = cmd_os[1].split(":");
+
+    var current = document.getElementById(cmd_os[ cmd_os.length - 1 ]);
     var loading = document.createElement('img');
     var parent = current.parentNode;
     loading.setAttribute('src',"assets/loading.gif");
     loading.classList = "rn-loading";
-
     parent.replaceChild(loading, current)
 
-    cockpit.spawn(cmd_os, options).done(function(data) {
-            returned = new String(data);
-            //console.log(returned);
-            if ( dolog ) { _log(returned); };
-            parent.replaceChild(current, loading);
-            alert("Successful");
-            return(true);
-        }).fail(function(error){
-            returned = new String(error);
-            //console.log(error);
-            if ( dolog ) { _log(returned); };
-            parent.replaceChild(current, loading);
-            alert("Failed, please check log screen");
-            return(false);
-        }
+    commands.forEach(function(command) {
+        console.log(command);
+        cockpit.spawn(cmd_os, options).done(function(data) {
+                returned = new String(data);
+                //console.log(returned);
+                if ( dolog ) { _log(returned); };
+                parent.replaceChild(current, loading);
+                alert("Successful");
+                return(true);
+            }).fail(function(error){
+                returned = new String(error);
+                //console.log(error);
+                if ( dolog ) { _log(returned); };
+                parent.replaceChild(current, loading);
+                alert("Failed, please check log screen");
+                return(false);
+            }
+        )
+    }
     );
-
 }
 
 // privileged exection
@@ -93,7 +97,7 @@ function install_options() {
     })
 
     var rn_cmd = runner_ansible;
-    var cmd_os = [rn_cmd, rn_cmd_request];
+    var cmd_os = [rn_cmd, rn_cmd_request, menu_item];
     var results = exec_su(cmd_os);
 
 };
@@ -103,7 +107,7 @@ function run_script_su() {
 
     var rn_cmd_request = this.id;
     var rn_cmd = runner_script;
-    var cmd_os = [rn_cmd, rn_cmd_request];
+    var cmd_os = [rn_cmd, rn_cmd_request, rn_cmd_request];
     var results = exec_su(cmd_os);
 };
 
@@ -113,7 +117,7 @@ function run_script_su_values() {
     var rn_cmd_request = this.id;
     var rn_value = document.getElementById(this.id +"-input").value
     var rn_cmd = runner_script;
-    var cmd_os = [rn_cmd, rn_cmd_request, rn_value];
+    var cmd_os = [rn_cmd, rn_cmd_request, rn_value, rn_cmd_request];
     var results = exec_su(cmd_os, false );
 };
 
@@ -122,7 +126,7 @@ function run_script() {
 
     var rn_cmd_request = this.id;
     var rn_cmd = runner_script;
-    var cmd_os = [rn_cmd, rn_cmd_request];
+    var cmd_os = [rn_cmd, rn_cmd_request, rn_cmd_request];
     var results = exec_n(cmd_os);
 };
 
@@ -132,7 +136,7 @@ function run_script_values() {
     var rn_cmd_request = this.id;
     var rn_value = document.getElementById(this.id +"-input").value
     var rn_cmd = runner_script;
-    var cmd_os = [rn_cmd, rn_cmd_request, rn_value];
+    var cmd_os = [rn_cmd, rn_cmd_request, rn_value, rn_cmd_request];
     var results = exec_n(cmd_os, false);
 };
 
@@ -154,7 +158,7 @@ function open_modal() {
     var item_modaldesc = document.getElementById(this.id+"-desc");
     var key_name = key.id.toLowerCase();
     var content = document.getElementById(this.id+"-content");
-    var id = this.id.replace('-modal','');
+    var id = this.id.replace(/-(modal|dialog_input)/,'')
     var item = rn_menu_data.dialog[id];
 
     // lazy
@@ -319,7 +323,7 @@ function build_page_menu_items(item, key) {
             item_button.id = "s-"+item.id.toLowerCase();
             superuser_required = true;
         }
-        else if (item.type === "modal") {
+        else if (item.type === "modal" || item.type === "dialog_input" ) {
             item_button.addEventListener("click", open_modal);
             item_button.id = item.id.toLowerCase()+"-"+item.type;
 
