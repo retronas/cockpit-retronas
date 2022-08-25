@@ -440,7 +440,7 @@ function read_menu_data() {
     cockpit.file(rn_menus,
         { syntax: JSON,
           binary: false,
-          max_read_size: 65536,
+          max_read_size: 100000,
           superuser: 'true'
         }).read()
         .then((content, tag) => {
