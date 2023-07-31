@@ -7,7 +7,8 @@
 //
 
 // config files
-const rn_menus = '/opt/retronas/config/retronas.json';
+const rn_menus = '/opt/retronas/config/menu';
+const rn_menus_main = '/opt/retronas/config/menu/main.json';
 const rn_vars = '/opt/retronas/ansible/retronas_vars.yml';
 
 // assets
@@ -132,7 +133,6 @@ function run_script() {
 
 // normal script with values from an input
 function run_script_values() {
-
     var rn_cmd_request = this.id;
     var rn_value = document.getElementById(this.id +"-input").value
     var rn_cmd = runner_script;
@@ -195,9 +195,9 @@ function close_modal() {
 function build_top_level_menu() {
     menu_element = document.getElementById("retronas-menu");
     pages_element = document.getElementById("rn-pages-area")
-    main_menu_keys = Object.keys(rn_menu_data.dialog);
+    //main_menu_keys = Object.keys(rn_menus_main["main"]);
 
-    rn_menu_data.dialog['main'].items.forEach(main_menu=>{
+    rn_menu_data["menu"].items.forEach(main_menu=>{
 
         if ( main_menu.title.match(re) && main_menu.id !== "" ) {
 
@@ -229,10 +229,11 @@ function build_top_level_menu() {
     })
 }
 
-function build_menus(menu="main", type="page") {
-    var main_menu_keys = Object.keys(rn_menu_data.dialog);
+function build_menus(menu="menu", type="page") {
+    //var main_menu_keys = Object.keys(rn_menu_data.menu);
 
-    rn_menu_data.dialog[menu].items.forEach(key=>{
+    rn_menu_data.menu.items.forEach(key=>{
+
         if ( key.title.match(re) && key.id !== "" ) {
             key_name = key.id.toLowerCase();
             if ( key_name !== 'exit' ) {
@@ -253,8 +254,8 @@ function build_menus(menu="main", type="page") {
                 item_modaldesc.innerHTML = key.description.replaceAll('\n','<br />');
 
                 // items
-                key_prompt = rn_menu_data.dialog[key_name].prompt;
-                rn_menu_data.dialog[key_name].items.forEach(item=>{
+                key_prompt = rn_menu_data["menu"][key_name].prompt;
+                rn_menu_data["menu"][key_name].items.forEach(item=>{
 
                     build_page_menu_items(item, key);
 
@@ -435,9 +436,9 @@ function read_ansible_cfg() {
 }
 
 // read in menu config
-function read_menu_data() {
+function read_menu_data(rn_menus_data) {
     
-    cockpit.file(rn_menus,
+    cockpit.file(rn_menus_data,
         { syntax: JSON,
           binary: false,
           max_read_size: 150000,
@@ -510,7 +511,7 @@ window.onload = function() {
     })
 
     read_ansible_cfg();
-    read_menu_data();
+    read_menu_data(rn_menus_main);
 
 }
 
