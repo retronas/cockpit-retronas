@@ -8,7 +8,7 @@
 
 // config files
 const rn_menus = '/opt/retronas/config/menu';
-const rn_menus_main = '/opt/retronas/config/menu/main.json';
+const rn_menus_main = rn_menus + '/main.json';
 const rn_vars = '/opt/retronas/ansible/retronas_vars.yml';
 
 // assets
