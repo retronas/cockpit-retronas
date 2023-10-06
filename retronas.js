@@ -179,9 +179,7 @@ function open_modal() {
 
     content.appendChild(item_ul);
 
-    item.items.forEach(item=>{
-        build_page_menu_items(item, key);
-    });
+    build_page_menu_items();
 
     key.classList.replace("rn-hidden","rn-show")
 
@@ -238,8 +236,8 @@ function build_menus(menu="menu", type="page") {
             key_name = key.id.toLowerCase();
             if ( key_name !== 'exit' ) {
 
-                //console.log(key_name);
                 page_name = "rn-"+key_name+'-'+type;
+		console.log(page_name);
 
                 var item_page = document.getElementById(page_name);
                 const item_ul = document.createElement('ul');
@@ -253,14 +251,6 @@ function build_menus(menu="menu", type="page") {
                 item_modaldesc.replaceChildren();
                 item_modaldesc.innerHTML = key.description.replaceAll('\n','<br />');
 
-                // items
-                key_prompt = rn_menu_data["menu"][key_name].prompt;
-                rn_menu_data["menu"][key_name].items.forEach(item=>{
-
-                    build_page_menu_items(item, key);
-
-                });
-                
             }
         }
 
@@ -268,13 +258,15 @@ function build_menus(menu="menu", type="page") {
     
 }
 
-function build_page_menu_items(item, key) {
+function build_page_menu_items() {
+  
 
+    rn_menu_data["menu"].items.forEach(item=>{
     if ( item.id !== "" ) {
 
         item_prompt = item.prompt;
         if ( item_prompt === "" ) {
-            item_prompt = key_prompt;
+            item_prompt = "Install";
         }
 
         // build menu item
@@ -382,13 +374,14 @@ function build_page_menu_items(item, key) {
 
         item_li.appendChild(item_wdiv);
 
-        document.getElementById("ul-"+key.id.toLowerCase()).appendChild(item_li);
+    	document.getElementById("ul-"+rn_menu_data["menu"].id.toLowerCase()).appendChild(item_li);
 
         //if (item.type === "modal") {
         //    build_menus(item.id, "modal-page");
         //}
 
     }
+    });
 }
 
 
@@ -437,7 +430,7 @@ function read_ansible_cfg() {
 
 // read in menu config
 function read_menu_data(rn_menus_data) {
-    
+
     cockpit.file(rn_menus_data,
         { syntax: JSON,
           binary: false,
@@ -446,8 +439,12 @@ function read_menu_data(rn_menus_data) {
         }).read()
         .then((content, tag) => {
             rn_menu_data = content;
-            build_top_level_menu();
-            //build_page_menu_items();
+
+	    if ( rn_menus_data.indexOf("main.json") > 0 ) {
+            	build_top_level_menu();
+	    } else {
+            	build_page_menu_items();
+            }
             build_menus();
 
         })
@@ -485,6 +482,10 @@ function scan_path() {
 
 // page switcher, now you see it, now you don't
 function show_page() {
+
+    var menu_name = this.id.split("-")[1];
+    var menu_file = rn_menus + '/' + menu_name + '.json'; 
+    read_menu_data( menu_file );
 
     // this is ugly but meh
     const pages = Array.from(document.getElementsByClassName('rn-page-container'));
