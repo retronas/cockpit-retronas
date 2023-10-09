@@ -153,7 +153,10 @@ function hide_modal() {
 function open_modal() {
     hide_modal();
 
-    if ( rn_menu_data === null ) { return;  }
+    console.log(this.id);
+    if ( rn_menu_data === null ) { 
+	    return;  
+    }
 
 	    // show what we clicked on
     //console.log(this.id);
@@ -164,7 +167,7 @@ function open_modal() {
     var id = this.id.replace(/-(modal|dialog_input)/,'')
     var item = rn_menu_data.menu[id];
     if ( typeof item === 'undefined' ) { return; }
-    //console.log(item);
+    console.log(item);
 
     // lazy
     try {
@@ -243,7 +246,7 @@ function build_menus(menu="menu", type="page") {
                 page_name = "rn-"+key_name+'-'+type;
 
                 var item_page = document.getElementById(page_name);
-		        //console.log(item_page);
+		console.log(item_page);
                 const item_ul = document.createElement('ul');
                 const item_modaldesc = document.createElement('div');
                 item_ul.id = "ul-"+key_name;
@@ -273,10 +276,10 @@ function build_page_menu_items() {
     rn_menu_data["menu"].items.forEach(item=>{
     if ( item.id !== "" ) {
 
-        item_prompt = item.prompt;
-        if ( item_prompt === "" ) {
-            item_prompt = "Install";
-        }
+        var item_prompt = item.prompt;
+	var item_type = item.type;
+	if ( item_type === "modal" || item_type.match("dialog") ) { item_prompt = "Open" }
+        if ( item_prompt === "" ) { item_prompt = "Install"; }
 
         // build menu item
         //<li><div>EtherDFS<button id="etherdfs" class="rn-installer">Install</button></div></li>
