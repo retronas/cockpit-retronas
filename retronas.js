@@ -164,7 +164,7 @@ function open_modal() {
     var id = this.id.replace(/-(modal|dialog_input)/,'')
     var item = rn_menu_data.menu[id];
     if ( typeof item === 'undefined' ) { return; }
-    console.log(item);
+    //console.log(item);
 
     // lazy
     try {
@@ -243,7 +243,7 @@ function build_menus(menu="menu", type="page") {
                 page_name = "rn-"+key_name+'-'+type;
 
                 var item_page = document.getElementById(page_name);
-		console.log(item_page);
+		        //console.log(item_page);
                 const item_ul = document.createElement('ul');
                 const item_modaldesc = document.createElement('div');
                 item_ul.id = "ul-"+key_name;
