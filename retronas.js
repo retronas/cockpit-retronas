@@ -241,7 +241,6 @@ function build_menus(menu="menu", type="page") {
             if ( key_name !== 'exit' ) {
 
                 page_name = "rn-"+key_name+'-'+type;
-		console.log(page_name);
 
                 var item_page = document.getElementById(page_name);
 		console.log(item_page);
@@ -267,6 +266,9 @@ function build_menus(menu="menu", type="page") {
 function build_page_menu_items() {
  
     if ( rn_menu_data === null ) { return; }
+    
+    target_ul = document.getElementById("ul-"+rn_menu_data["menu"].id.toLowerCase())
+    target_ul.replaceChildren();
 
     rn_menu_data["menu"].items.forEach(item=>{
     if ( item.id !== "" ) {
@@ -381,7 +383,7 @@ function build_page_menu_items() {
 
         item_li.appendChild(item_wdiv);
 
-    	document.getElementById("ul-"+rn_menu_data["menu"].id.toLowerCase()).appendChild(item_li);
+	target_ul.appendChild(item_li);
 
         //if (item.type === "modal") {
         //    build_menus(item.id, "modal-page");
