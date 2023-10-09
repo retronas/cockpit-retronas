@@ -153,22 +153,25 @@ function hide_modal() {
 function open_modal() {
     hide_modal();
 
-    console.log(this.id);
-    if ( rn_menu_data === null ) { 
-	    return;  
-    }
+    var menu_name = this.id.split("-modal")[0];
+    var menu_file = rn_menus + '/' + menu_name + '.json';
+    read_menu_data( menu_file );
+    console.log(menu_file);
+
 
 	    // show what we clicked on
     //console.log(this.id);
     var key = document.getElementById(this.id+"-page");
     var item_modaldesc = document.getElementById(this.id+"-desc");
     var key_name = key.id.toLowerCase();
+    key_name = key_name.replace("_","-");
     var content = document.getElementById(this.id+"-content");
     var id = this.id.replace(/-(modal|dialog_input)/,'')
+    /*
     var item = rn_menu_data.menu[id];
     if ( typeof item === 'undefined' ) { return; }
-    console.log(item);
-
+    */
+	
     // lazy
     try {
         var item_ul = document.getElementById("ul-"+ key_name);
@@ -180,14 +183,16 @@ function open_modal() {
 
     item_ul.id = "ul-"+ key_name;
 
+    /*
     item_modaldesc.replaceChildren();
     item_modaldesc.innerHTML = item.description.replaceAll('|','<br />').replaceAll('\\','');
     content.appendChild(item_modaldesc);
-
+    */
     content.appendChild(item_ul);
 
+    /*
     build_page_menu_items();
-
+    */
     key.classList.replace("rn-hidden","rn-show")
 
 }
@@ -246,7 +251,6 @@ function build_menus(menu="menu", type="page") {
                 page_name = "rn-"+key_name+'-'+type;
 
                 var item_page = document.getElementById(page_name);
-		console.log(item_page);
                 const item_ul = document.createElement('ul');
                 const item_modaldesc = document.createElement('div');
                 item_ul.id = "ul-"+key_name;
@@ -269,9 +273,14 @@ function build_menus(menu="menu", type="page") {
 function build_page_menu_items() {
  
     if ( rn_menu_data === null ) { return; }
-    
-    target_ul = document.getElementById("ul-"+rn_menu_data["menu"].id.toLowerCase())
-    target_ul.replaceChildren();
+  
+    try {
+      target_ul = document.getElementById("ul-"+rn_menu_data["menu"].id+"-modal-page");
+      target_ul.replaceChildren();
+    } catch(err) {
+      target_ul = document.getElementById("ul-"+rn_menu_data["menu"].id);
+      target_ul.replaceChildren();
+    }
 
     rn_menu_data["menu"].items.forEach(item=>{
     if ( item.id !== "" ) {
@@ -296,6 +305,7 @@ function build_page_menu_items() {
 
         // default button id
         item_button.id = item.id.toLowerCase();
+
         var superuser_required = false;
 
         // add the listener
@@ -328,9 +338,9 @@ function build_page_menu_items() {
             item_button.id = "s-"+item.id.toLowerCase();
             superuser_required = true;
         }
-        else if (item.type === "modal" || item.type === "dialog_input" ) {
+        else if (item.type === "modal" || item.type.match("dialog")) {
             item_button.addEventListener("click", open_modal);
-            item_button.id = item.id.toLowerCase()+"-"+item.type;
+            item_button.id = item.id.toLowerCase()+"-modal";
 
             // create the div to display as a modal
 
