@@ -90,8 +90,8 @@ function install_options() {
     var menu_item = this.id;
     // this is horrid
     var menu_name = this.parentNode.parentNode.parentNode.id.replace("ul-","");
-    //console.log(rn_menu_data.dialog[menu_name]);
-    rn_menu_data.dialog[menu_name].items.forEach(item=>{
+    //console.log(rn_menu_data.menu);
+    rn_menu_data.menu.items.forEach(item=>{
         if ( menu_item === item.id ) {
             rn_cmd_request = item.command;
         }
@@ -152,14 +152,19 @@ function hide_modal() {
 
 function open_modal() {
     hide_modal();
-    // show what we clicked on
+
+    if ( rn_menu_data === null ) { return;  }
+
+	    // show what we clicked on
     //console.log(this.id);
     var key = document.getElementById(this.id+"-page");
     var item_modaldesc = document.getElementById(this.id+"-desc");
     var key_name = key.id.toLowerCase();
     var content = document.getElementById(this.id+"-content");
     var id = this.id.replace(/-(modal|dialog_input)/,'')
-    var item = rn_menu_data.dialog[id];
+    var item = rn_menu_data.menu[id];
+    if ( typeof item === 'undefined' ) { return; }
+    console.log(item);
 
     // lazy
     try {
@@ -175,7 +180,6 @@ function open_modal() {
     item_modaldesc.replaceChildren();
     item_modaldesc.innerHTML = item.description.replaceAll('|','<br />').replaceAll('\\','');
     content.appendChild(item_modaldesc);
-
 
     content.appendChild(item_ul);
 
@@ -240,17 +244,19 @@ function build_menus(menu="menu", type="page") {
 		console.log(page_name);
 
                 var item_page = document.getElementById(page_name);
+		console.log(item_page);
                 const item_ul = document.createElement('ul');
                 const item_modaldesc = document.createElement('div');
                 item_ul.id = "ul-"+key_name;
+		if ( item_page != null ) {
                 item_page.appendChild(item_modaldesc);
                 item_page.appendChild(item_ul);
-
+		
                 item_modaldesc.id = key_name+"-desc"
                 item_modaldesc.classList = "rn-modal-desc";
                 item_modaldesc.replaceChildren();
                 item_modaldesc.innerHTML = key.description.replaceAll('\n','<br />');
-
+		}
             }
         }
 
@@ -259,7 +265,8 @@ function build_menus(menu="menu", type="page") {
 }
 
 function build_page_menu_items() {
-  
+ 
+    if ( rn_menu_data === null ) { return; }
 
     rn_menu_data["menu"].items.forEach(item=>{
     if ( item.id !== "" ) {
