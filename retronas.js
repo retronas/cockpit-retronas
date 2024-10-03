@@ -436,7 +436,7 @@ function read_ansible_cfg() {
         { syntax: "YAML",
           binary: false,
           max_read_size: 256,
-          superuser: 'true'
+          superuser: true
         }).read()
         .then((content, tag) => {
             rn_settings = yaml_to_js(content);
@@ -457,7 +457,7 @@ function read_menu_data(rn_menus_data) {
         { syntax: JSON,
           binary: false,
           max_read_size: 150000,
-          superuser: 'true'
+          superuser: true
         }).read()
         .then((content, tag) => {
             rn_menu_data = content;
