@@ -241,6 +241,7 @@ function build_top_level_menu() {
 
 function build_menus(menu="menu", type="page") {
     //var main_menu_keys = Object.keys(rn_menu_data.menu);
+    if ( rn_menu_data === null ) { return; }
 
     rn_menu_data.menu.items.forEach(key=>{
 
@@ -435,7 +436,7 @@ function read_ansible_cfg() {
     cockpit.file(rn_vars,
         { syntax: "YAML",
           binary: false,
-          max_read_size: 256,
+          max_read_size: 1024,
           superuser: true
         }).read()
         .then((content, tag) => {
@@ -472,7 +473,7 @@ function read_menu_data(rn_menus_data) {
         })
         .catch(error => {
             //console.log(error);
-            var msg = "Failed to read config file";
+            var msg = "Failed to read menu data";
             alert(msg);
             _log(msg)
         });
