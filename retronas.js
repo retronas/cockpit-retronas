@@ -26,6 +26,9 @@ var rn_settings = new Object();
 // exclude these tui menus, they aren't needed for web
 const re = new RegExp('^(?!Exit|Services)');
 
+// set permissions const
+const permission = cockpit.permission({ admin: true });
+
 // update log window
 function _log(output) {
     document.getElementById("log-area").innerText = output;
@@ -526,16 +529,24 @@ function show_page() {
 // waiting until we're loaded up so the elements we need are available
 window.onload = function() {
 
-    // group the elements we require to work with
-    const menuitems = Array.from(document.getElementsByClassName('rn-menu-item'));
+  permission.addEventListener("changed", function() {
+      console.log(permission)
+      if ( ! permission.is_superuser ) {
+        alert("You need to be super user to use this tool");
+        return;
+      } else {
+        // group the elements we require to work with
+        const menuitems = Array.from(document.getElementsByClassName('rn-menu-item'));
 
-    // menu items (rn-menu-item)
-    menuitems.forEach(menuitem=>{
-        menuitem.addEventListener("click", show_page);
-    })
+        // menu items (rn-menu-item)
+        menuitems.forEach(menuitem=>{
+            menuitem.addEventListener("click", show_page);
+        })
 
-    read_ansible_cfg();
-    read_menu_data(rn_menus_main);
+        read_ansible_cfg();
+        read_menu_data(rn_menus_main);
+      }
+    });
 
 }
 
