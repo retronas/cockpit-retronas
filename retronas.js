@@ -7,7 +7,8 @@
 //
 
 // config files
-const rn_menus = '/opt/retronas/config/retronas.json';
+const rn_menus = '/opt/retronas/config/menu';
+const rn_menus_main = rn_menus + '/main.json';
 const rn_vars = '/opt/retronas/ansible/retronas_vars.yml';
 
 // assets
@@ -24,6 +25,9 @@ var rn_settings = new Object();
 
 // exclude these tui menus, they aren't needed for web
 const re = new RegExp('^(?!Exit|Services)');
+
+// set permissions const
+const permission = cockpit.permission({ admin: true });
 
 // update log window
 function _log(output) {
@@ -89,8 +93,8 @@ function install_options() {
     var menu_item = this.id;
     // this is horrid
     var menu_name = this.parentNode.parentNode.parentNode.id.replace("ul-","");
-    //console.log(rn_menu_data.dialog[menu_name]);
-    rn_menu_data.dialog[menu_name].items.forEach(item=>{
+    //console.log(rn_menu_data.menu);
+    rn_menu_data.menu.items.forEach(item=>{
         if ( menu_item === item.id ) {
             rn_cmd_request = item.command;
         }
@@ -132,7 +136,6 @@ function run_script() {
 
 // normal script with values from an input
 function run_script_values() {
-
     var rn_cmd_request = this.id;
     var rn_value = document.getElementById(this.id +"-input").value
     var rn_cmd = runner_script;
@@ -152,15 +155,26 @@ function hide_modal() {
 
 function open_modal() {
     hide_modal();
-    // show what we clicked on
+
+    var menu_name = this.id.split("-modal")[0];
+    var menu_file = rn_menus + '/' + menu_name + '.json';
+    read_menu_data( menu_file );
+    console.log(menu_file);
+
+
+	    // show what we clicked on
     //console.log(this.id);
     var key = document.getElementById(this.id+"-page");
     var item_modaldesc = document.getElementById(this.id+"-desc");
     var key_name = key.id.toLowerCase();
+    key_name = key_name.replace("_","-");
     var content = document.getElementById(this.id+"-content");
     var id = this.id.replace(/-(modal|dialog_input)/,'')
-    var item = rn_menu_data.dialog[id];
-
+    /*
+    var item = rn_menu_data.menu[id];
+    if ( typeof item === 'undefined' ) { return; }
+    */
+	
     // lazy
     try {
         var item_ul = document.getElementById("ul-"+ key_name);
@@ -172,17 +186,16 @@ function open_modal() {
 
     item_ul.id = "ul-"+ key_name;
 
+    /*
     item_modaldesc.replaceChildren();
     item_modaldesc.innerHTML = item.description.replaceAll('|','<br />').replaceAll('\\','');
     content.appendChild(item_modaldesc);
-
-
+    */
     content.appendChild(item_ul);
 
-    item.items.forEach(item=>{
-        build_page_menu_items(item, key);
-    });
-
+    /*
+    build_page_menu_items();
+    */
     key.classList.replace("rn-hidden","rn-show")
 
 }
@@ -195,9 +208,9 @@ function close_modal() {
 function build_top_level_menu() {
     menu_element = document.getElementById("retronas-menu");
     pages_element = document.getElementById("rn-pages-area")
-    main_menu_keys = Object.keys(rn_menu_data.dialog);
+    //main_menu_keys = Object.keys(rn_menus_main["main"]);
 
-    rn_menu_data.dialog['main'].items.forEach(main_menu=>{
+    rn_menu_data["menu"].items.forEach(main_menu=>{
 
         if ( main_menu.title.match(re) && main_menu.id !== "" ) {
 
@@ -229,37 +242,31 @@ function build_top_level_menu() {
     })
 }
 
-function build_menus(menu="main", type="page") {
-    var main_menu_keys = Object.keys(rn_menu_data.dialog);
+function build_menus(menu="menu", type="page") {
+    //var main_menu_keys = Object.keys(rn_menu_data.menu);
+    if ( rn_menu_data === null ) { return; }
 
-    rn_menu_data.dialog[menu].items.forEach(key=>{
+    rn_menu_data.menu.items.forEach(key=>{
+
         if ( key.title.match(re) && key.id !== "" ) {
             key_name = key.id.toLowerCase();
             if ( key_name !== 'exit' ) {
 
-                //console.log(key_name);
                 page_name = "rn-"+key_name+'-'+type;
 
                 var item_page = document.getElementById(page_name);
                 const item_ul = document.createElement('ul');
                 const item_modaldesc = document.createElement('div');
                 item_ul.id = "ul-"+key_name;
+		if ( item_page != null ) {
                 item_page.appendChild(item_modaldesc);
                 item_page.appendChild(item_ul);
-
+		
                 item_modaldesc.id = key_name+"-desc"
                 item_modaldesc.classList = "rn-modal-desc";
                 item_modaldesc.replaceChildren();
                 item_modaldesc.innerHTML = key.description.replaceAll('\n','<br />');
-
-                // items
-                key_prompt = rn_menu_data.dialog[key_name].prompt;
-                rn_menu_data.dialog[key_name].items.forEach(item=>{
-
-                    build_page_menu_items(item, key);
-
-                });
-                
+		}
             }
         }
 
@@ -267,14 +274,25 @@ function build_menus(menu="main", type="page") {
     
 }
 
-function build_page_menu_items(item, key) {
+function build_page_menu_items() {
+ 
+    if ( rn_menu_data === null ) { return; }
+  
+    try {
+      target_ul = document.getElementById("ul-"+rn_menu_data["menu"].id+"-modal-page");
+      target_ul.replaceChildren();
+    } catch(err) {
+      target_ul = document.getElementById("ul-"+rn_menu_data["menu"].id);
+      target_ul.replaceChildren();
+    }
 
+    rn_menu_data["menu"].items.forEach(item=>{
     if ( item.id !== "" ) {
 
-        item_prompt = item.prompt;
-        if ( item_prompt === "" ) {
-            item_prompt = key_prompt;
-        }
+        var item_prompt = item.prompt;
+	var item_type = item.type;
+	if ( item_type === "modal" || item_type.match("dialog") ) { item_prompt = "Open" }
+        if ( item_prompt === "" ) { item_prompt = "Install"; }
 
         // build menu item
         //<li><div>EtherDFS<button id="etherdfs" class="rn-installer">Install</button></div></li>
@@ -291,6 +309,7 @@ function build_page_menu_items(item, key) {
 
         // default button id
         item_button.id = item.id.toLowerCase();
+
         var superuser_required = false;
 
         // add the listener
@@ -323,9 +342,9 @@ function build_page_menu_items(item, key) {
             item_button.id = "s-"+item.id.toLowerCase();
             superuser_required = true;
         }
-        else if (item.type === "modal" || item.type === "dialog_input" ) {
+        else if (item.type === "modal" || item.type.match("dialog")) {
             item_button.addEventListener("click", open_modal);
-            item_button.id = item.id.toLowerCase()+"-"+item.type;
+            item_button.id = item.id.toLowerCase()+"-modal";
 
             // create the div to display as a modal
 
@@ -381,13 +400,14 @@ function build_page_menu_items(item, key) {
 
         item_li.appendChild(item_wdiv);
 
-        document.getElementById("ul-"+key.id.toLowerCase()).appendChild(item_li);
+	target_ul.appendChild(item_li);
 
         //if (item.type === "modal") {
         //    build_menus(item.id, "modal-page");
         //}
 
     }
+    });
 }
 
 
@@ -419,8 +439,8 @@ function read_ansible_cfg() {
     cockpit.file(rn_vars,
         { syntax: "YAML",
           binary: false,
-          max_read_size: 256,
-          superuser: 'true'
+          max_read_size: 1024,
+          superuser: true
         }).read()
         .then((content, tag) => {
             rn_settings = yaml_to_js(content);
@@ -435,24 +455,28 @@ function read_ansible_cfg() {
 }
 
 // read in menu config
-function read_menu_data() {
-    
-    cockpit.file(rn_menus,
+function read_menu_data(rn_menus_data) {
+
+    cockpit.file(rn_menus_data,
         { syntax: JSON,
           binary: false,
           max_read_size: 150000,
-          superuser: 'true'
+          superuser: true
         }).read()
         .then((content, tag) => {
             rn_menu_data = content;
-            build_top_level_menu();
-            //build_page_menu_items();
+
+	    if ( rn_menus_data.indexOf("main.json") > 0 ) {
+            	build_top_level_menu();
+	    } else {
+            	build_page_menu_items();
+            }
             build_menus();
 
         })
         .catch(error => {
             //console.log(error);
-            var msg = "Failed to read config file";
+            var msg = "Failed to read menu data";
             alert(msg);
             _log(msg)
         });
@@ -485,6 +509,10 @@ function scan_path() {
 // page switcher, now you see it, now you don't
 function show_page() {
 
+    var menu_name = this.id.split("-")[1];
+    var menu_file = rn_menus + '/' + menu_name + '.json'; 
+    read_menu_data( menu_file );
+
     // this is ugly but meh
     const pages = Array.from(document.getElementsByClassName('rn-page-container'));
 
@@ -501,16 +529,24 @@ function show_page() {
 // waiting until we're loaded up so the elements we need are available
 window.onload = function() {
 
-    // group the elements we require to work with
-    const menuitems = Array.from(document.getElementsByClassName('rn-menu-item'));
+  permission.addEventListener("changed", function() {
+      console.log(permission)
+      if ( ! permission.is_superuser ) {
+        alert("You need to be super user to use this tool");
+        return;
+      } else {
+        // group the elements we require to work with
+        const menuitems = Array.from(document.getElementsByClassName('rn-menu-item'));
 
-    // menu items (rn-menu-item)
-    menuitems.forEach(menuitem=>{
-        menuitem.addEventListener("click", show_page);
-    })
+        // menu items (rn-menu-item)
+        menuitems.forEach(menuitem=>{
+            menuitem.addEventListener("click", show_page);
+        })
 
-    read_ansible_cfg();
-    read_menu_data();
+        read_ansible_cfg();
+        read_menu_data(rn_menus_main);
+      }
+    });
 
 }
 
